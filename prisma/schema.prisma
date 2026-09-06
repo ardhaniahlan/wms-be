@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Item {
+  id              String           @id @default(uuid())
+  sku             String           @unique
+  name            String
+  category        String?
+  baseUnit        String           @map("base_unit")
+  attributes      Json             @default("{}")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  
+  inventoryLevels InventoryLevel[]
+  mutations       Mutation[]
+
+  @@map("items")
+}
+
+model Warehouse {
+  id        String     @id @default(uuid())
+  code      String     @unique
+  name      String
+  address   String?
+  
+  locations Location[]
+
+  @@map("warehouses")
+}
+
+model Location {
+  id          String  @id @default(uuid())
+  warehouseId String  @map("warehouse_id")
+  code        String  @unique
+  description String?
+  
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  
+  inventories InventoryLevel[]
+  
+  mutationsOrigin Mutation[] @relation("OriginLocation")
+  mutationsDest   Mutation[] @relation("DestinationLocation")
+
+  @@map("locations")
+}
+
+model InventoryLevel {
+  itemId     String   @map("item_id")
+  locationId String   @map("location_id")
+  quantity   Int      @default(0)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  item     Item     @relation(fields: [itemId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+
+  @@id([itemId, locationId])
+  @@map("inventory_levels")
+}
+
+enum MutationType {
+  IN
+  OUT
+  MOVE
+  ADJUST
+}
+
+model Mutation {
+  id                    String       @id @default(uuid())
+  itemId                String       @map("item_id")
+  locationId            String       @map("location_id")
+  destinationLocationId String?      @map("destination_location_id")
+  type                  MutationType
+  quantity              Int
+  referenceDoc          String?      @map("reference_doc")
+  userId                String       @map("user_id")
+  timestamp             DateTime     @default(now())
+
+  item                Item      @relation(fields: [itemId], references: [id])
+  user                User      @relation(fields: [userId], references: [id])
+  
+  originLocation      Location  @relation("OriginLocation", fields: [locationId], references: [id])
+  destinationLocation Location? @relation("DestinationLocation", fields: [destinationLocationId], references: [id])
+
+  @@map("mutations")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  name      String
+  role      String
+  
+  mutations Mutation[]
+
+  @@map("users")
+}
