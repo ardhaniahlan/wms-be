@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import itemRoutes from './features/items/item.route';
+import warehouseRoutes from './features/warehouses/warehouse.route';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,6 +14,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/api/items', itemRoutes);
+app.use('/api/warehouses', warehouseRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
