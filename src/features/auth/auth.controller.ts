@@ -12,8 +12,16 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const result = await authService.loginUser(req.body);
-    res.status(200).json({ success: true, message: 'Login berhasil', data: result });
+    const { user, token } = await authService.loginUser(req.body);
+    
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    res.status(200).json({ success: true, message: 'Login berhasil', data: { user } });
   } catch (error: any) {
     res.status(401).json({ success: false, message: error.message });
   }

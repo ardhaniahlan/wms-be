@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import cors from 'cors';
 import itemRoutes from './features/items/item.route';
 import warehouseRoutes from './features/warehouses/warehouse.route';
@@ -8,11 +8,16 @@ import mutationRoutes from './features/mutations/mutation.route';
 import userRoutes from './features/users/user.route';
 import authRoutes from './features/auth/auth.route';
 import { verifyToken } from './middlewares/auth.middleware';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true, 
+}));
+app.use(cookieParser());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 

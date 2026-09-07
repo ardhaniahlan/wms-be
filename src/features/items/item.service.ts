@@ -4,6 +4,18 @@ export const getItems = async () => {
   return await prisma.item.findMany();
 };
 
+export const getItemById = async (id: string) => {
+  const item = await prisma.item.findUnique({
+    where: { id: id },
+  });
+
+  if (!item) {
+    throw new Error("Barang tidak ditemukan");
+  }
+
+  return item;
+};
+
 export const createItem = async (data: { sku: string; name: string; category:string; baseUnit: string; attributes: any }) => {
   return await prisma.item.create({
     data: {
