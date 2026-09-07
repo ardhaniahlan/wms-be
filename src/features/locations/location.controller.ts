@@ -42,3 +42,14 @@ export const deleteLocationById = async (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: 'Gagal menghapus, lokasi rak tidak ditemukan', error });
   }
 };
+
+export const getLocationById = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    
+    const data = await locationService.getByLocationById(id);
+    res.status(200).json({ success: true, data: data, message: 'Data lokasi rak berhasil ditemukan' });
+  } catch (error) {
+    res.status(404).json({ success: false, message: 'Gagal mengubah, lokasi rak tidak ditemukan', error });
+  }
+};

@@ -3,14 +3,16 @@ import {
   getAllLocations, 
   createNewLocation, 
   updateLocationById, 
-  deleteLocationById 
+  deleteLocationById, 
+  getLocationById
 } from './location.controller';
 
 const router = Router();
 
 router.get('/', getAllLocations);
 router.post('/', createNewLocation);
-router.put('/:id', updateLocationById);
+router.get('/:id', getLocationById);
+router.patch('/:id', updateLocationById);
 router.delete('/:id', deleteLocationById);
 
 export default router;

@@ -29,3 +29,9 @@ export const deleteWarehouse = async (id: string) => {
     where: { id },
   });
 };
+
+export const getWarehouseById = async (id: string) => {
+  return await prisma.warehouse.findUnique({
+    where: { id }
+  });
+};

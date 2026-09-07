@@ -3,14 +3,70 @@ import * as mutationService from './mutation.service';
 
 export const createNewMutation = async (req: Request, res: Response) => {
   try {
-    const body = req.body;
-    const result = await mutationService.processMutation(body);
+    const { type, itemId, qty, sourceRackId, destinationRackId, notes } = req.body;
+
+    const userId = (req as any).user?.id || (req as any).userId; 
+
+    const mutationType = type === 'TRANSFER' ? 'MOVE' : type;
+
+    let primaryLocationId = type === 'IN' ? destinationRackId : sourceRackId;
+
+    const result = await mutationService.processMutation({
+      itemId: itemId,
+      locationId: primaryLocationId,
+      destinationLocationId: destinationRackId,
+      type: mutationType,
+      quantity: Number(qty),
+      referenceDoc: notes,
+      userId: userId,
+    });
     res.status(201).json({ 
       success: true, 
       data: result, 
-      message: `Mutasi ${body.type} berhasil, stok telah diupdate!` 
+      message: `Mutasi ${result.type} berhasil, stok telah diupdate!` 
     });
   } catch (error) {
     res.status(400).json({ success: false, message: 'Gagal memproses mutasi stok', error });
+  }
+};
+
+export const getAllMutations = async (req: Request, res: Response) => {
+  try {
+    const mutations = await mutationService.getMutations();
+    
+    const formattedMutations = mutations.map((mut) => ({
+      id: mut.id,
+      type: mut.type === 'MOVE' ? 'TRANSFER' : mut.type,
+      itemId: mut.itemId,
+      qty: mut.quantity,
+      notes: mut.referenceDoc,
+      createdAt: mut.timestamp,
+      
+      item: mut.item,
+      
+      sourceRack: mut.originLocation ? {
+         code: mut.originLocation.code,
+         warehouse: { name: mut.originLocation.warehouse?.name || 'Tidak diketahui' }
+      } : null,
+      
+      destinationRack: mut.destinationLocation ? {
+         code: mut.destinationLocation.code,
+         warehouse: { name: mut.destinationLocation.warehouse?.name || 'Tidak diketahui' }
+      } : null,
+      
+      user: mut.user
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: 'Riwayat mutasi berhasil diambil',
+      data: formattedMutations,
+    });
+  } catch (error: any) {
+    console.error("ERROR GET MUTATIONS:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Terjadi kesalahan pada server saat mengambil data mutasi',
+    });
   }
 };

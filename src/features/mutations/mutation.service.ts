@@ -1,6 +1,46 @@
 import prisma from '../../config/database';
 import { MutationType } from '@prisma/client';
 
+export const getMutations = async () => {
+  return await prisma.mutation.findMany({
+    orderBy: {
+      timestamp: 'desc', 
+    },
+    include: {
+      item: {
+        select: {
+          sku: true,
+          name: true,
+          baseUnit: true,
+        }
+      },
+      originLocation: { 
+        select: {
+          code: true,
+          warehouse: { 
+            select: { name: true } 
+          }
+        }
+      },
+      destinationLocation: { 
+        select: {
+          code: true,
+          warehouse: { 
+            select: { name: true } 
+          }
+        }
+      },
+      user: { 
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        }
+      }
+    }
+  });
+};
+
 export const processMutation = async (data: {
   itemId: string;
   locationId: string;

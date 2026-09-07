@@ -42,3 +42,14 @@ export const deleteWarehouseById = async (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: 'Gagal menghapus, gudang tidak ditemukan', error });
   }
 };
+
+export const getWarehousesById = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const warehouses = await warehouseService.getWarehouseById(id);
+    res.status(200).json({ success: true, data: warehouses });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Gagal mengambil data gudang', error });
+  }
+};
+

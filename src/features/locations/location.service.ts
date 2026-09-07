@@ -8,6 +8,12 @@ export const getLocations = async () => {
   });
 };
 
+export const getByLocationById = async (id: string) => {
+  return await prisma.location.findUnique({
+    where: { id }
+  });
+};
+
 export const createLocation = async (data: { warehouseId: string; code: string; description?: string }) => {
   return await prisma.location.create({
     data: {
