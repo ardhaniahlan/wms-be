@@ -91,9 +91,12 @@ model Mutation {
 
 model User {
   id        String     @id @default(uuid())
+  email     String     @unique
+  password  String     
   name      String
   role      String
   
+  createdAt DateTime   @default(now())
   mutations Mutation[]
 
   @@map("users")
