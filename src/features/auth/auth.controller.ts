@@ -30,7 +30,7 @@ export const login = async (req: Request, res: Response) => {
 
     res
       .status(200)
-      .json({ success: true, message: "Login berhasil", data: { user } });
+      .json({ success: true, message: "Login berhasil", data: { user, token } });
   } catch (error: any) {
     res.status(401).json({ success: false, message: error.message });
   }
