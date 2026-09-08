@@ -26,3 +26,17 @@ export const login = async (req: Request, res: Response) => {
     res.status(401).json({ success: false, message: error.message });
   }
 };
+
+export const logoutUser = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    return res.status(200).json({ success: true, message: "Berhasil keluar" });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

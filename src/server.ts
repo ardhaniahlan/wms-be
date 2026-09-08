@@ -8,6 +8,7 @@ import mutationRoutes from './features/mutations/mutation.route';
 import userRoutes from './features/users/user.route';
 import authRoutes from './features/auth/auth.route';
 import dashboardRoutes from './features/dashboard/dashboard.route';
+import catalogRoutes from './features/catalog/catalog.route';
 import { verifyToken } from './middlewares/auth.middleware';
 import cookieParser from 'cookie-parser';
 
@@ -15,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: [process.env.FRONTEND_URL as string, 'http://localhost:3000'],
   credentials: true, 
 }));
 app.use(cookieParser());
@@ -26,6 +27,7 @@ app.use(verifyToken);
 
 app.use('/api/items', itemRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/catalog', catalogRoutes);
 app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/inventories', inventoryRoutes);
