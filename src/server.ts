@@ -16,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: [process.env.FRONTEND_URL as string, 'http://localhost:3000'],
+  origin: ['https://wms-fe-two.vercel.app', 'http://localhost:3000'],
   credentials: true, 
 }));
 app.use(cookieParser());
