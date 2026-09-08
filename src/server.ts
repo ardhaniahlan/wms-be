@@ -7,6 +7,7 @@ import inventoryRoutes from './features/inventories/inventory.route';
 import mutationRoutes from './features/mutations/mutation.route';
 import userRoutes from './features/users/user.route';
 import authRoutes from './features/auth/auth.route';
+import dashboardRoutes from './features/dashboard/dashboard.route';
 import { verifyToken } from './middlewares/auth.middleware';
 import cookieParser from 'cookie-parser';
 
@@ -24,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use(verifyToken);
 
 app.use('/api/items', itemRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/inventories', inventoryRoutes);
