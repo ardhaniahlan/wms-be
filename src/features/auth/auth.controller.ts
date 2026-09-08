@@ -1,27 +1,36 @@
-import { Request, Response } from 'express';
-import * as authService from './auth.service';
+import { Request, Response } from "express";
+import * as authService from "./auth.service";
 
 export const register = async (req: Request, res: Response) => {
   try {
     const newUser = await authService.registerUser(req.body);
-    res.status(201).json({ success: true, message: 'Registrasi berhasil', data: newUser });
+    res
+      .status(201)
+      .json({ success: true, message: "Registrasi berhasil", data: newUser });
   } catch (error) {
-    res.status(400).json({ success: false, message: 'Gagal registrasi (Email mungkin sudah dipakai)' });
+    res
+      .status(400)
+      .json({
+        success: false,
+        message: "Gagal registrasi (Email mungkin sudah dipakai)",
+      });
   }
 };
 
 export const login = async (req: Request, res: Response) => {
   try {
     const { user, token } = await authService.loginUser(req.body);
-    
-    res.cookie('token', token, {
+
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ success: true, message: 'Login berhasil', data: { user } });
+    res
+      .status(200)
+      .json({ success: true, message: "Login berhasil", data: { user } });
   } catch (error: any) {
     res.status(401).json({ success: false, message: error.message });
   }
@@ -29,10 +38,10 @@ export const login = async (req: Request, res: Response) => {
 
 export const logoutUser = async (req: Request, res: Response) => {
   try {
-    res.clearCookie('token', {
+    res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+      secure: true, 
+      sameSite: "none", 
     });
 
     return res.status(200).json({ success: true, message: "Berhasil keluar" });
