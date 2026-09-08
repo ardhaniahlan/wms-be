@@ -1,44 +1,46 @@
 import prisma from '../../config/database';
 import { MutationType } from '@prisma/client';
 
-export const getMutations = async () => {
-  return await prisma.mutation.findMany({
-    orderBy: {
-      timestamp: 'desc', 
-    },
-    include: {
-      item: {
-        select: {
-          sku: true,
-          name: true,
-          baseUnit: true,
-        }
+export const getMutations = async (page: number = 1, limit: number = 10, search: string = '') => {
+  const skip = (page - 1) * limit;
+
+  const searchQuery = search ? {
+    OR: [
+      { item: { name: { contains: search, mode: 'insensitive' as const } } },
+      { referenceDoc: { contains: search, mode: 'insensitive' as const } }
+    ]
+  } : {};
+
+  const [data, totalItems] = await Promise.all([
+    prisma.mutation.findMany({
+      where: searchQuery,
+      skip: skip,
+      take: limit,
+      orderBy: {
+        timestamp: 'desc', 
       },
-      originLocation: { 
-        select: {
-          code: true,
-          warehouse: { 
-            select: { name: true } 
-          }
-        }
-      },
-      destinationLocation: { 
-        select: {
-          code: true,
-          warehouse: { 
-            select: { name: true } 
-          }
-        }
-      },
-      user: { 
-        select: {
-          id: true,
-          name: true,
-          email: true,
+      include: {
+        item: {
+          select: { sku: true, name: true, baseUnit: true }
+        },
+        originLocation: { 
+          select: { code: true, warehouse: { select: { name: true } } }
+        },
+        destinationLocation: { 
+          select: { code: true, warehouse: { select: { name: true } } }
+        },
+        user: { 
+          select: { id: true, name: true, email: true }
         }
       }
-    }
-  });
+    }),
+    prisma.mutation.count({ where: searchQuery })
+  ]);
+
+  return {
+    data,
+    meta: { totalItems, currentPage: page, totalPages: Math.ceil(totalItems / limit), limit }
+  };
 };
 
 export const processMutation = async (data: {

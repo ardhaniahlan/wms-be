@@ -3,10 +3,14 @@ import * as locationService from './location.service';
 
 export const getAllLocations = async (req: Request, res: Response) => {
   try {
-    const locations = await locationService.getLocations();
-    res.status(200).json({ success: true, data: locations });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Gagal mengambil data lokasi rak', error });
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const search = req.query.search as string || '';
+
+    const result = await locationService.getLocations(page, limit, search);
+    return res.status(200).json({ success: true, data: result.data, meta: result.meta });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 

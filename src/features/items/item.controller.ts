@@ -3,12 +3,19 @@ import * as itemService from "./item.service";
 
 export const getAllItems = async (req: Request, res: Response) => {
   try {
-    const items = await itemService.getItems();
-    res.status(200).json({ success: true, data: items });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Gagal mengambil data barang", error });
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const search = req.query.search as string || '';
+
+    const result = await itemService.getItems(page, limit, search);
+    
+    return res.status(200).json({
+      success: true,
+      data: result.data,
+      meta: result.meta
+    });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 

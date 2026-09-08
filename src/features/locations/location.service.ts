@@ -1,11 +1,32 @@
 import prisma from '../../config/database';
 
-export const getLocations = async () => {
-  return await prisma.location.findMany({
-    include: {
-      warehouse: true,
-    }
-  });
+export const getLocations = async (page: number = 1, limit: number = 10, search: string = '') => {
+  const skip = (page - 1) * limit;
+
+  const searchQuery = search ? {
+    OR: [
+      { code: { contains: search, mode: 'insensitive' as const } },
+      { warehouse: { name: { contains: search, mode: 'insensitive' as const } } }
+    ]
+  } : {};
+
+  const [data, totalItems] = await Promise.all([
+    prisma.location.findMany({
+      where: searchQuery,
+      skip: skip,
+      take: limit,
+      include: {
+        warehouse: true,
+      },
+      orderBy: { code: 'asc' }
+    }),
+    prisma.location.count({ where: searchQuery })
+  ]);
+
+  return {
+    data,
+    meta: { totalItems, currentPage: page, totalPages: Math.ceil(totalItems / limit), limit }
+  };
 };
 
 export const getByLocationById = async (id: string) => {

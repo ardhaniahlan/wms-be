@@ -1,7 +1,29 @@
 import prisma from '../../config/database';
 
-export const getItems = async () => {
-  return await prisma.item.findMany();
+export const getItems = async (page: number = 1, limit: number = 10, search: string = '') => {
+  const skip = (page - 1) * limit;
+
+  const searchQuery = search ? {
+    OR: [
+      { name: { contains: search, mode: 'insensitive' as const } },
+      { sku: { contains: search, mode: 'insensitive' as const } }
+    ]
+  } : {};
+
+  const [data, totalItems] = await Promise.all([
+    prisma.item.findMany({
+      where: searchQuery,
+      skip: skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.item.count({ where: searchQuery })
+  ]);
+
+  return {
+    data,
+    meta: { totalItems, currentPage: page, totalPages: Math.ceil(totalItems / limit), limit }
+  };
 };
 
 export const getItemById = async (id: string) => {

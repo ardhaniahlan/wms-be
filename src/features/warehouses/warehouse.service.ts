@@ -1,7 +1,29 @@
 import prisma from '../../config/database';
 
-export const getWarehouses = async () => {
-  return await prisma.warehouse.findMany();
+export const getWarehouses = async (page: number = 1, limit: number = 10, search: string = '') => {
+  const skip = (page - 1) * limit;
+
+  const searchQuery = search ? {
+    OR: [
+      { name: { contains: search, mode: 'insensitive' as const } },
+      { code: { contains: search, mode: 'insensitive' as const } }
+    ]
+  } : {};
+
+  const [data, totalItems] = await Promise.all([
+    prisma.warehouse.findMany({
+      where: searchQuery,
+      skip: skip,
+      take: limit,
+      orderBy: { name: 'asc' }
+    }),
+    prisma.warehouse.count({ where: searchQuery })
+  ]);
+
+  return {
+    data,
+    meta: { totalItems, currentPage: page, totalPages: Math.ceil(totalItems / limit), limit }
+  };
 };
 
 export const createWarehouse = async (data: { code: string; name: string; address?: string }) => {

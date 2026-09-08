@@ -3,10 +3,14 @@ import * as warehouseService from './warehouse.service';
 
 export const getAllWarehouses = async (req: Request, res: Response) => {
   try {
-    const warehouses = await warehouseService.getWarehouses();
-    res.status(200).json({ success: true, data: warehouses });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Gagal mengambil data gudang', error });
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const search = req.query.search as string || '';
+
+    const result = await warehouseService.getWarehouses(page, limit, search);
+    return res.status(200).json({ success: true, data: result.data, meta: result.meta });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 

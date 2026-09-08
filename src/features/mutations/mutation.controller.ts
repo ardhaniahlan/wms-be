@@ -32,41 +32,27 @@ export const createNewMutation = async (req: Request, res: Response) => {
 
 export const getAllMutations = async (req: Request, res: Response) => {
   try {
-    const mutations = await mutationService.getMutations();
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const search = req.query.search as string || '';
+
+    const result = await mutationService.getMutations(page, limit, search);
     
-    const formattedMutations = mutations.map((mut) => ({
+    const formattedMutations = result.data.map((mut: any) => ({
       id: mut.id,
-      type: mut.type === 'MOVE' ? 'TRANSFER' : mut.type,
+      type: mut.type === 'MOVE' ? 'TRANSFER' : mut.type, 
       itemId: mut.itemId,
       qty: mut.quantity,
       notes: mut.referenceDoc,
-      createdAt: mut.timestamp,
-      
+      createdAt: mut.timestamp, 
       item: mut.item,
-      
-      sourceRack: mut.originLocation ? {
-         code: mut.originLocation.code,
-         warehouse: { name: mut.originLocation.warehouse?.name || 'Tidak diketahui' }
-      } : null,
-      
-      destinationRack: mut.destinationLocation ? {
-         code: mut.destinationLocation.code,
-         warehouse: { name: mut.destinationLocation.warehouse?.name || 'Tidak diketahui' }
-      } : null,
-      
+      sourceRack: mut.originLocation ? { code: mut.originLocation.code, warehouse: { name: mut.originLocation.warehouse?.name || 'Tidak diketahui' } } : null,
+      destinationRack: mut.destinationLocation ? { code: mut.destinationLocation.code, warehouse: { name: mut.destinationLocation.warehouse?.name || 'Tidak diketahui' } } : null,
       user: mut.user
     }));
 
-    return res.status(200).json({
-      success: true,
-      message: 'Riwayat mutasi berhasil diambil',
-      data: formattedMutations,
-    });
+    return res.status(200).json({ success: true, data: formattedMutations, meta: result.meta });
   } catch (error: any) {
-    console.error("ERROR GET MUTATIONS:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || 'Terjadi kesalahan pada server saat mengambil data mutasi',
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
